@@ -10,7 +10,7 @@ electorn+vue+serialport+element
 
 #### 安装教程
 
-1. git clone https://gitee.com/a1258/nodejs-serialport-tool.git
+1. git clone https://github.com/l1veIn/nodejs-serialport-tool.git
 2. cd nodejs-serialport-tool
 3. npm install && npm start
 
