@@ -1,83 +1,91 @@
 <style>
-
 * {
-    margin: 0;
-    padding: 0
+  margin: 0;
+  padding: 0;
+  overflow: unset;
 }
 
 html,
 body,
 .el-container,
 .el-aside {
-    height: 100%;
+  height: 100%;
 }
 
 html,
 body {
-    background-color: #F8F8F8;
+  background-color: #f8f8f8;
 }
 
 .el-container {
-    padding: 10px
+  padding: 10px;
 }
 
 .el-aside,
 .el-main,
 .el-footer {
-    padding: 5px
+  padding: 5px;
 }
 
 .el-main,
 .el-footer {
-    height: auto;
+  height: auto;
 }
 
 .el-aside {
-    margin-right: 5px;
+  margin-right: 5px;
+  overflow: unset;
 }
-
 
 /* .el-card__body{
   padding: 0
 } */
 
 .el-textarea {
-    border-bottom: 1px solid #ebeef5
-}
-
-.el-footer {
-    /* margin-top: 10px; */
+  border-bottom: 1px solid #ebeef5;
 }
 
 textarea {
-    border: none
+  border: none;
 }
 
 .el-textarea__inner {
-    border: none
+  border: none;
 }
 
 .buttonGroup {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    display: flex;
-    justify-content: flex-end;
+  padding-top: 10px;
+  display: flex;
+  justify-content: flex-end;
 }
 
 button {
-    width: 120px;
-    margin-left: 10px
+  width: 100px;
+  /* height: 30px; */
+  margin-left: 10px;
 }
 
 .el-switch {
-    color: lightgrey;
-    margin-bottom: 10px;
+  color: lightgrey;
+  margin-bottom: 10px;
 }
 
 .el-switch__label {
-    font-size: 15px
+  font-size: 15px;
 }
-
+.el-card__body {
+  padding: 10px;
+}
+.el-form-item__label,
+.el-tabs__item {
+  font-weight: 600;
+}
+.el-form {
+  margin-bottom: 10px;
+}
+.el-form-item {
+  margin-bottom: 0;
+}
 </style>
 
 <template>
@@ -94,6 +102,9 @@ button {
                 </el-form-item>
                 <el-form-item label="波特率">
                     <el-input v-model="baudRate"></el-input>
+                </el-form-item>
+                 <el-form-item label="最多显示">
+                    <el-input v-model="maxLength"></el-input>
                 </el-form-item>
             </el-form>
             <el-switch v-model="userMySQL" active-text="mySQL">
@@ -115,18 +126,20 @@ button {
     <el-container style="padding:0">
         <el-main>
             <el-card style="height:100%">
-                <el-tabs v-model="activeName" @tab-click="handleClick">
+                <el-tabs v-model="activeName" @tab-click="handleClick" stretch>
                     <el-tab-pane label="数据" name="first">数据</el-tab-pane>
                     <el-tab-pane label="图像" name="second">
-                        <div id="myChart" :style="{width: '300px', height: '300px'}"></div>
+                         <el-switch v-model="animation" active-text="animation">
+                         </el-switch>
+                        <div id="myChart" :style="{width: '595px', height: '300px'}"></div>
                     </el-tab-pane>
                 </el-tabs>
             </el-card>
         </el-main>
-        <el-footer style="height: 200px">
+        <el-footer style="height: 154px">
             <el-card style="height:100%">
                 <!-- <textarea name="name" rows="8" cols="80"></textarea> -->
-                <el-input type="textarea" :rows="5" placeholder="请输入内容" v-model="textarea">
+                <el-input type="textarea" :rows="3" placeholder="请输入内容" v-model="textarea">
                 </el-input>
                 <div class="buttonGroup">
                     <el-button type="info" @click='clearText'>清空</el-button>
@@ -141,87 +154,153 @@ button {
 </template>
 
 <script>
-
-import Serialport from 'serialport'
-import echarts from 'echarts'
-    // import covButton from './button'
+import Serialport from "serialport";
+import echarts from "echarts";
+import { setInterval } from "timers";
+// import covButton from './button'
 export default {
-    name: 'test',
-    data() {
-        return {
-            text: '',
-            labelPosition: 'top',
-            formLabelAlign: {
-                name: '',
-                region: '',
-                type: ''
-            },
-            selectedValue: 0,
-            ports: [],
-            baudRate: '9600',
-            activeName: 'first',
-            textarea: '',
-            userMySQL: false
-        }
-    },
-    computed: {},
-    mounted() {
-        // this.drawLine();
-        Serialport.list((err, ports) => {
-            this.ports = ports
-        });
-    },
-    methods: {
-        drawLine() {
-                // 基于准备好的dom，初始化echarts实例
-                let myChart = echarts.init(document.getElementById('myChart'))
-                    // 绘制图表
-                myChart.setOption({
-                    title: {
-                        text: '在Vue中使用echarts'
-                    },
-                    tooltip: {},
-                    xAxis: {
-                        data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]
-                    },
-                    yAxis: {},
-                    series: [{
-                        name: '销量',
-                        type: 'line',
-                        data: [5, 20, 36, 10, 10, 20]
-                    }]
-                });
-            },
-            handleClick(e) {
-                console.log(e.$options.propsData);
-                if (e.$options.propsData.name == 'second') {
-                    this.drawLine()
-                }
-            },
-            clearText() {
-                this.textarea = ''
-            },
-            sendMsg() {
-                if (this.textarea == '') {
-                    this.$notify({
-                        title: '警告',
-                        message: '发送内容不能为空',
-                        type: 'warning',
-                        offset: 100
-                    });
-                } else {
-                    this.$notify({
-                        title: '成功',
-                        message: '发送成功',
-                        type: 'success',
-                        offset: 100
-                    });
-                }
+  name: "test",
+  data() {
+    return {
+      text: "",
+      labelPosition: "top",
+      formLabelAlign: {
+        name: "",
+        region: "",
+        type: ""
+      },
+      selectedValue: 0,
+      ports: [],
+      baudRate: "9600",
+      activeName: "first",
+      textarea: "",
+      userMySQL: false,
+      source: [],
+      maxLengthNum: 100,
+      animation: true,
+      int: null
+    };
+  },
+  computed: {
+    option() {
+      return {
+        legend: {},
+        tooltip: {},
+        dataset: {
+          dimensions: [
+            { name: "time", type: "time" },
+            // 可以简写为 string，表示维度名。
+            "value"
+          ],
+          // 获取实时数据
+          source: this.source
+        },
+        xAxis: { type: "time" },
+        yAxis: {
+          type: "value",
+          name: "电压/V",
+          nameTextStyle: {
+            fontSize: 20
+          },
+          splitLine: {
+            show: false
+          },
+          axisLabel: {
+            formatter: "{value} V"
+          }
+        },
+        series: [
+          {
+            type: "line",
+            encode: {
+              // 将 "time" 列映射到 X 轴。
+              x: "time",
+              // 将 "value" 列映射到 Y 轴。
+              y: "value",
+              tooltip: ["time", "value"]
             }
+          }
+        ],
+        animation: this.animation
+      };
     },
-    components: {
-        // covButton
+    maxLength: {
+      get: function() {
+        return this.maxLengthNum; //获取的时候直接获取值
+      },
+      set: function(value) {
+        if (Object.is(value * 1, NaN)) {
+          this.$notify({
+            title: "警告",
+            message: "请输入数字",
+            type: "warning",
+            offset: 10
+          });
+        } else {
+          this.maxLengthNum = value;
+        }
+      }
     }
-}
-
+  },
+  mounted() {
+    Serialport.list((err, ports) => {
+      this.ports = ports;
+    });
+  },
+  methods: {
+    drawLine() {
+      console.log("drawLine");
+      // 基于准备好的dom，初始化echarts实例
+      let myChart = echarts.init(document.getElementById("myChart"));
+      //   myChart.showLoading();
+      // 绘制图表
+      //   myChart.hideLoading();
+      myChart.setOption(this.option);
+    },
+    handleClick(e) {
+      let that = this;
+      console.log(e.$options.propsData);
+      let myChart = echarts.init(document.getElementById("myChart"));
+      if (e.$options.propsData.name == "second") {
+        this.int = self.setInterval(function() {
+          //   console.log("drawLine");
+          //   console.log(myChart)
+          let temp = that.source[0];
+          that.source.push([Date.now(), Math.random() * 100]);
+          that.source.length > that.maxLength &&
+            that.source.splice(0, that.source.length - that.maxLength);
+          myChart.setOption(that.option);
+        }, 500);
+      } else {
+        if (this.int) {
+          clearInterval(this.int);
+          this.int = null;
+        }
+      }
+    },
+    clearText() {
+      this.textarea = "";
+    },
+    sendMsg() {
+      if (this.textarea == "") {
+        this.$notify({
+          title: "警告",
+          message: "发送内容不能为空",
+          type: "warning",
+          offset: 10
+        });
+      } else {
+        this.$notify({
+          title: "成功",
+          message: "发送成功",
+          type: "success",
+          offset: 10
+        });
+      }
+    }
+  },
+  components: {
+    // covButton
+  }
+};
 </script>
