@@ -73,90 +73,94 @@ button {
 .el-switch__label {
   font-size: 15px;
 }
+
 .el-card__body {
   padding: 10px;
 }
+
 .el-form-item__label,
 .el-tabs__item {
   font-weight: 600;
 }
+
 .el-form {
   margin-bottom: 10px;
 }
+
 .el-form-item {
   margin-bottom: 0;
 }
 </style>
 
 <template>
-
 <el-container>
-    <el-aside style="" width="200px">
-        <el-card style="height:100%">
-            <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
-                <el-form-item label="选择接口">
-                    <el-select v-model="selectedValue" placeholder="请选择">
-                        <el-option v-for="(item,index) in ports" :key="index" :label="item.comName" :value="index">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="波特率">
-                    <el-input v-model="baudRate"></el-input>
-                </el-form-item>
-                 <el-form-item label="最多显示">
-                    <el-input v-model="maxLength"></el-input>
-                </el-form-item>
-            </el-form>
-            <el-switch v-model="userMySQL" active-text="mySQL">
+  <el-aside style="" width="200px">
+    <el-card style="height:100%">
+      <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
+        <el-form-item label="选择接口">
+          <el-select v-model="selectedValue" placeholder="请选择">
+            <el-option v-for="(item,index) in ports" :key="index" :label="item.comName" :value="index">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="波特率">
+          <el-input v-model="baudRate"></el-input>
+        </el-form-item>
+        <el-form-item label="最多显示">
+          <el-input v-model="maxLength"></el-input>
+        </el-form-item>
+      </el-form>
+      <el-switch v-model="userMySQL" active-text="mySQL">
+      </el-switch>
+      <transition name="el-fade-in-linear">
+        <!-- <div v-show="userMySQL" class="transition-box">.el-fade-in-linear</div> -->
+        <el-form v-show="userMySQL" :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
+          <el-form-item label="用户名">
+            <el-input v-model="username"></el-input>
+          </el-form-item>
+          <el-form-item label="密码">
+            <el-input v-model="passwd"></el-input>
+          </el-form-item>
+        </el-form>
+      </transition>
+      <el-button :type="started?'warning':'success'" style="width:100%" round @click='started?stopWatching():startWatching()'>{{ started? 'stop':'start'}}</el-button>
+    </el-card>
+  </el-aside>
+  <el-container style="padding:0">
+    <el-main>
+      <el-card style="height:100%">
+        <el-tabs v-model="activeName" @tab-click="handleClick" stretch>
+          <el-tab-pane label="数据" name="first">数据</el-tab-pane>
+          <el-tab-pane label="图像" name="second">
+            <el-switch v-model="animation" active-text="animation">
             </el-switch>
-            <transition name="el-fade-in-linear">
-                <!-- <div v-show="userMySQL" class="transition-box">.el-fade-in-linear</div> -->
-                <el-form v-show="userMySQL" :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
-                    <el-form-item label="用户名">
-                        <el-input v-model="username"></el-input>
-                    </el-form-item>
-                    <el-form-item label="密码">
-                        <el-input v-model="passwd"></el-input>
-                    </el-form-item>
-                </el-form>
-            </transition>
-            <el-button type="success" style="width:100%" round>start</el-button>
-        </el-card>
-    </el-aside>
-    <el-container style="padding:0">
-        <el-main>
-            <el-card style="height:100%">
-                <el-tabs v-model="activeName" @tab-click="handleClick" stretch>
-                    <el-tab-pane label="数据" name="first">数据</el-tab-pane>
-                    <el-tab-pane label="图像" name="second">
-                         <el-switch v-model="animation" active-text="animation">
-                         </el-switch>
-                        <div id="myChart" :style="{width: '595px', height: '300px'}"></div>
-                    </el-tab-pane>
-                </el-tabs>
-            </el-card>
-        </el-main>
-        <el-footer style="height: 154px">
-            <el-card style="height:100%">
-                <!-- <textarea name="name" rows="8" cols="80"></textarea> -->
-                <el-input type="textarea" :rows="3" placeholder="请输入内容" v-model="textarea">
-                </el-input>
-                <div class="buttonGroup">
-                    <el-button type="info" @click='clearText'>清空</el-button>
-                    <el-button type="primary" @click='sendMsg'>发送</el-button>
-                </div>
-            </el-card>
-        </el-footer>
-    </el-container>
+            <div id="myChart" :style="{width: '595px', height: '300px'}"></div>
+          </el-tab-pane>
+        </el-tabs>
+      </el-card>
+    </el-main>
+    <el-footer style="height: 154px">
+      <el-card style="height:100%">
+        <!-- <textarea name="name" rows="8" cols="80"></textarea> -->
+        <el-input type="textarea" :rows="3" placeholder="请输入内容" v-model="textarea">
+        </el-input>
+        <div class="buttonGroup">
+          <el-button type="info" @click='clearText'>清空</el-button>
+          <el-button type="primary" @click='sendMsg'>发送</el-button>
+        </div>
+      </el-card>
+    </el-footer>
+  </el-container>
 
 </el-container>
-
 </template>
 
 <script>
 import Serialport from "serialport";
 import echarts from "echarts";
-import { setInterval } from "timers";
+import {
+  setInterval
+} from "timers";
 // import covButton from './button'
 export default {
   name: "test",
@@ -171,6 +175,7 @@ export default {
       },
       selectedValue: 0,
       ports: [],
+      port: null,
       baudRate: "9600",
       activeName: "first",
       textarea: "",
@@ -178,7 +183,8 @@ export default {
       source: [],
       maxLengthNum: 100,
       animation: true,
-      int: null
+      int: null,
+      started:false
     };
   },
   computed: {
@@ -187,15 +193,19 @@ export default {
         legend: {},
         tooltip: {},
         dataset: {
-          dimensions: [
-            { name: "time", type: "time" },
+          dimensions: [{
+              name: "time",
+              type: "time"
+            },
             // 可以简写为 string，表示维度名。
             "value"
           ],
           // 获取实时数据
           source: this.source
         },
-        xAxis: { type: "time" },
+        xAxis: {
+          type: "time"
+        },
         yAxis: {
           type: "value",
           name: "电压/V",
@@ -209,18 +219,16 @@ export default {
             formatter: "{value} V"
           }
         },
-        series: [
-          {
-            type: "line",
-            encode: {
-              // 将 "time" 列映射到 X 轴。
-              x: "time",
-              // 将 "value" 列映射到 Y 轴。
-              y: "value",
-              tooltip: ["time", "value"]
-            }
+        series: [{
+          type: "line",
+          encode: {
+            // 将 "time" 列映射到 X 轴。
+            x: "time",
+            // 将 "value" 列映射到 Y 轴。
+            y: "value",
+            tooltip: ["time", "value"]
           }
-        ],
+        }],
         animation: this.animation
       };
     },
@@ -245,38 +253,49 @@ export default {
   mounted() {
     Serialport.list((err, ports) => {
       this.ports = ports;
+      this.port = new Serialport(ports[0].comName, {
+        baudRate: this.baudRate * 1
+      }, function(err) {
+        if (err) {
+          return console.log('Error: ', err.message);
+        }
+      });
     });
   },
   methods: {
     drawLine() {
+      let that = this;
       console.log("drawLine");
       // 基于准备好的dom，初始化echarts实例
       let myChart = echarts.init(document.getElementById("myChart"));
-      //   myChart.showLoading();
-      // 绘制图表
-      //   myChart.hideLoading();
-      myChart.setOption(this.option);
+      this.int = self.setInterval(function() {
+        //   console.log("drawLine");
+        //   console.log(myChart)
+        let temp = that.source[0];
+        // 测试输入
+        that.source.push([Date.now(), Math.random() * 100]);
+        that.source.length > that.maxLength &&
+          that.source.splice(0, that.source.length - that.maxLength);
+
+
+        //执行绘图
+        myChart.setOption(that.option);
+      }, 500);
+    },
+    stopDrawLine() {
+      clearInterval(this.int);
+      this.int = null;
     },
     handleClick(e) {
       let that = this;
       console.log(e.$options.propsData);
-      let myChart = echarts.init(document.getElementById("myChart"));
-      if (e.$options.propsData.name == "second") {
-        this.int = self.setInterval(function() {
-          //   console.log("drawLine");
-          //   console.log(myChart)
-          let temp = that.source[0];
-          that.source.push([Date.now(), Math.random() * 100]);
-          that.source.length > that.maxLength &&
-            that.source.splice(0, that.source.length - that.maxLength);
-          myChart.setOption(that.option);
-        }, 500);
-      } else {
-        if (this.int) {
-          clearInterval(this.int);
-          this.int = null;
-        }
-      }
+      // if (e.$options.propsData.name == "second") {
+      //   that.drawLine()
+      // } else {
+      //   if (this.int) {
+      //     that.stopDrawLine()
+      //   }
+      // }
     },
     clearText() {
       this.textarea = "";
@@ -297,6 +316,26 @@ export default {
           offset: 10
         });
       }
+    },
+    startWatching(){
+      console.log('startWatching');
+      let that = this
+      that.getData()
+      that.drawLine()
+      that.started = true
+    },
+    stopWatching(){
+      console.log('stopWatching');
+      let that = this
+      that.stopDrawLine()
+      that.stopGetData()
+      that.started = false
+    },
+    getData(){
+
+    },
+    stopGetData(){
+
     }
   },
   components: {
