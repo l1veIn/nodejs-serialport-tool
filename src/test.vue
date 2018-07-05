@@ -156,11 +156,17 @@ button {
 </template>
 
 <script>
-import Serialport from "serialport";
+import Serialport from "serialport/test";
 import echarts from "echarts";
 import {
   setInterval
 } from "timers";
+const MockBinding = Serialport.Binding;
+const portPath = 'COM_ANYTHING';
+MockBinding.createPort(portPath, {
+  echo: false,
+  record: false
+});
 // import covButton from './button'
 export default {
   name: "test",
@@ -184,7 +190,8 @@ export default {
       maxLengthNum: 100,
       animation: true,
       int: null,
-      started:false
+      fakeDataClock: null,
+      started: false
     };
   },
   computed: {
@@ -253,13 +260,6 @@ export default {
   mounted() {
     Serialport.list((err, ports) => {
       this.ports = ports;
-      this.port = new Serialport(ports[0].comName, {
-        baudRate: this.baudRate * 1
-      }, function(err) {
-        if (err) {
-          return console.log('Error: ', err.message);
-        }
-      });
     });
   },
   methods: {
@@ -273,11 +273,6 @@ export default {
         //   console.log(myChart)
         let temp = that.source[0];
         // 测试输入
-        that.source.push([Date.now(), Math.random() * 100]);
-        that.source.length > that.maxLength &&
-          that.source.splice(0, that.source.length - that.maxLength);
-
-
         //执行绘图
         myChart.setOption(that.option);
       }, 500);
@@ -309,6 +304,7 @@ export default {
           offset: 10
         });
       } else {
+        // 发送要发送的内容
         this.$notify({
           title: "成功",
           message: "发送成功",
@@ -317,25 +313,81 @@ export default {
         });
       }
     },
-    startWatching(){
+    startWatching() {
       console.log('startWatching');
       let that = this
       that.getData()
-      that.drawLine()
-      that.started = true
     },
-    stopWatching(){
+    stopWatching() {
       console.log('stopWatching');
       let that = this
       that.stopDrawLine()
       that.stopGetData()
       that.started = false
     },
-    getData(){
+    getData() {
+      let that = this
+      that.port = new Serialport(that.ports[that.selectedValue].comName, {
+        baudRate: that.baudRate * 1
+      }, function(err) {
+        if (err) {
+          return that.$notify({
+            title: "警告",
+            message: err.message,
+            type: "warning",
+            offset: 10
+          });
+          // console.log('Error: ', err.message);
+        } else {
+          that.$notify({
+            title: "成功",
+            message: "连接成功，正在读取数据。。",
+            type: "success",
+            offset: 10,
+            duration: 1000
+          });
+          // 虚拟数据
+          // that.creatFakeData()
+          // that.fakeDataClock = self.setInterval(function() {
+          //   that.port.write(Math.floor(Math.random() * 100).toString(16), () => {
+          //     console.log('Write:\t\t Complete!');
+          //     console.log('Last write:\t', that.port.binding.lastWrite.toString('utf8'));
+          //   });
+          //   that.source.push([Date.now(), Math.random() * 100]);
+          //   that.source.length > that.maxLength && that.source.splice(0, that.source.length - that.maxLength);
+          // }, 1000);
+          //
+          //
+          that.port.on('open', () => {
+            console.log('Port opened:\t', that.port.path);
+          });
+          // that.port.write(Math.floor(Math.random() * 100).toString(16), () => {
+          //   console.log('Write:\t\t Complete!');
+          //   console.log('Last write:\t', that.port.binding.lastWrite.toString('utf8'));
+          // });
 
+          // log received data
+          //
+          that.port.on('data', (data) => {
+            console.log('Received:\t', data.toString('utf8'));
+          });
+
+          that.port.on('open', () => {
+            that.port.binding.emitData(Buffer.from('Hi from my test!'));
+          });
+          // 监听数据
+          // that.port.on('data', (data) => {
+          //   console.log('Received:\t', data.toString('utf8'));
+          // });
+          // 开始绘图
+          // that.drawLine()
+          that.started = true
+        }
+      });
     },
-    stopGetData(){
-
+    stopGetData() {
+      clearInterval(this.fakeDataClock);
+      this.fakeDataClock = null;
     }
   },
   components: {
