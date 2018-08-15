@@ -14,11 +14,6 @@ electorn+vue+serialport+element
 2. cd nodejs-serialport-tool
 3. npm install && npm start
 
-#### 使用说明
-
-1. xxxx
-2. xxxx
-3. xxxx
 
 #### 参与贡献
 
