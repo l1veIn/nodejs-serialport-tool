@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow , Menu} from 'electron';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import { enableLiveReload } from 'electron-compile';
 
@@ -8,13 +8,64 @@ let mainWindow;
 
 const isDevMode = process.execPath.match(/[\\/]electron/);
 
+// const template = [
+//   {
+//     label: 'Edit',
+//     submenu: [
+//       {role: 'undo'},
+//       {role: 'redo'},
+//       {type: 'separator'},
+//       {role: 'cut'},
+//       {role: 'copy'},
+//       {role: 'paste'},
+//       {role: 'pasteandmatchstyle'},
+//       {role: 'delete'},
+//       {role: 'selectall'}
+//     ]
+//   },
+//   {
+//     label: 'Viewwww',
+//     submenu: [
+//       {role: 'reload'},
+//       {role: 'forcereload'},
+//       {role: 'toggledevtools'},
+//       {type: 'separator'},
+//       {role: 'resetzoom'},
+//       {role: 'zoomin'},
+//       {role: 'zoomout'},
+//       {type: 'separator'},
+//       {role: 'togglefullscreen'}
+//     ]
+//   },
+//   {
+//     role: 'window',
+//     submenu: [
+//       {role: 'minimize'},
+//       {role: 'close'}
+//     ]
+//   },
+//   {
+//     role: 'help',
+//     submenu: [
+//       {
+//         label: 'Learn More',
+//         click () { require('electron').shell.openExternal('https://electronjs.org') }
+//       }
+//     ]
+//   }
+// ];
+// const menu = Menu.buildFromTemplate(template)
+//   Menu.setApplicationMenu(menu)
+
+
+
 if (isDevMode) enableLiveReload();
 
 const createWindow = async () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 800,
-    height: 650,
+    height: 664,
   });
 
   // and load the index.html of the app.
